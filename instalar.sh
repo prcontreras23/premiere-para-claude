@@ -34,10 +34,10 @@ gris  "  archivos en $FUENTE"
 # El instalador pregunta cosas (cerrar Premiere), así que se le devuelve la
 # terminal como entrada: este script llega por una tubería y no tiene stdin.
 #
-# La prueba va dentro de un subshell para que, si /dev/tty existe pero no está
-# conectada (dentro de otro proceso, en CI), el aviso de bash muera ahí y no le
-# salga al usuario.
-if ( exec < /dev/tty ) 2>/dev/null; then
+# Se pregunta por la salida, no por /dev/tty: en `curl | bash` la entrada es la
+# tubería, pero la salida sigue siendo la terminal. Así se evita intentar un
+# redirect que falla y ensucia la pantalla con "Device not configured".
+if [ -t 1 ] || [ -t 2 ]; then
   exec "$FUENTE/install.sh" "$@" < /dev/tty
 else
   exec "$FUENTE/install.sh" "$@"
